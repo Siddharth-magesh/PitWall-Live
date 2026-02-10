@@ -1,0 +1,103 @@
+# PitWall Live - ML Configuration
+
+# Data Settings
+data:
+  cache_dir: "./data/cache"
+  raw_dir: "./data/raw"
+  processed_dir: "./data/processed"
+
+  # Seasons to use for training
+  training_seasons: [2019, 2020, 2021, 2022, 2023]
+  validation_seasons: [2024]
+
+  # Data sources
+  sources:
+    fastf1:
+      enabled: true
+      cache_enabled: true
+    openf1:
+      enabled: true
+      base_url: "https://api.openf1.org/v1"
+
+# Feature Engineering
+features:
+  driver_features:
+    - avg_finish_last_5
+    - avg_quali_last_5
+    - wins_at_circuit
+    - podiums_at_circuit
+    - dnf_rate
+    - championship_position
+
+  team_features:
+    - constructor_position
+    - avg_pit_stop_time
+    - reliability_rate
+
+  circuit_features:
+    - circuit_type
+    - track_length
+    - corner_count
+    - drs_zones
+    - overtaking_difficulty
+
+# Model Configurations
+models:
+  race_winner:
+    algorithm: "xgboost"
+    hyperparameters:
+      n_estimators: 500
+      max_depth: 8
+      learning_rate: 0.05
+      subsample: 0.8
+      colsample_bytree: 0.8
+      min_child_weight: 3
+      reg_alpha: 0.1
+      reg_lambda: 1.0
+    cv_folds: 5
+
+  lap_time:
+    algorithm: "lightgbm"
+    hyperparameters:
+      n_estimators: 300
+      max_depth: 6
+      learning_rate: 0.05
+      num_leaves: 31
+      min_child_samples: 20
+      subsample: 0.8
+      colsample_bytree: 0.8
+
+  qualifying:
+    algorithm: "catboost"
+    hyperparameters:
+      iterations: 500
+      depth: 8
+      learning_rate: 0.05
+      l2_leaf_reg: 3.0
+
+  tire_degradation:
+    algorithm: "lstm"
+    hyperparameters:
+      hidden_size: 64
+      num_layers: 2
+      dropout: 0.2
+      learning_rate: 0.001
+      batch_size: 32
+      epochs: 100
+
+# Training Settings
+training:
+  random_seed: 42
+  test_size: 0.2
+  early_stopping_rounds: 50
+  use_gpu: false
+
+# MLflow Settings
+mlflow:
+  tracking_uri: "./mlruns"
+  experiment_name: "pitwall_models"
+
+# Logging
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
